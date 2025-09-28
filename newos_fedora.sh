@@ -72,6 +72,32 @@ install_vencord() {
     sh -c "$(curl -sS https://raw.githubusercontent.com/Vendicated/VencordInstaller/main/install.sh)"
 }
 
+# Theme
+install_orchis_theme() {
+    tmp_dir=$(mktemp -d)
+    run_action "Cloning Orchis KDE theme repository" git clone --depth=1 https://github.com/vinceliuice/Orchis-kde.git "$tmp_dir/Orchis-kde"
+
+    run_action "Running Orchis KDE theme install script" bash "$tmp_dir/Orchis-kde/install.sh" --no-confirm
+    run_action "Cleaning up Orchis KDE theme repo" rm -rf "$tmp_dir"
+}
+
+# Icons
+install_tela_icons() {
+    tmp_dir=$(mktemp -d)
+    run_action "Cloning Tela Circle icon theme repository" git clone --depth=1 https://github.com/vinceliuice/Tela-circle-icon-theme.git "$tmp_dir/Tela-circle-icon-theme"
+
+    run_action "Running Tela Circle install script" bash "$tmp_dir/Tela-circle-icon-theme/install.sh" --dark --system
+    run_action "Cleaning up Tela Circle icon repo" rm -rf "$tmp_dir"
+}
+
+set_kde_defaults() {
+    local kdeglobals="/etc/skel/.config/kdeglobals"
+    mkdir -p "$(dirname "$kdeglobals")"
+    touch "$kdeglobals"
+
+    run_action "Setting Orchis Dark as Plasma theme" sed -i 's/^PlasmaStyle=.*/PlasmaStyle=Orchis-dark/' "$kdeglobals" || echo "PlasmaStyle=Orchis-dark" >> "$kdeglobals"
+    run_action "Setting Tela Circle Dark as icon theme" sed -i 's/^Icons=.*/Icons=Tela-circle-dark/' "$kdeglobals" || echo "Icons=Tela-circle-dark" >> "$kdeglobals"
+}
 
 # --- Main Script ---
 
@@ -131,7 +157,10 @@ run_action "Installing SpotX" install_spotx
 run_action "Installing Discord (Fusion RPM)" sudo dnf install -y discord
 run_action "Installing Vencord" install_vencord
 
-
+# KDE
+install_orchis_theme
+install_tela_icons
+set_kde_defaults
 
 # Final Summary
 
