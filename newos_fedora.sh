@@ -35,10 +35,23 @@ run_action() {
 
 # For editing fstab
 add_fstab_entry() {
-    echo '
+    # Steam Library
+    if ! grep -q "UUID=87f62db8-a45d-4955-ad93-e15c70f4ec22" /etc/fstab; then
+        echo '#steam library drive
+UUID=87f62db8-a45d-4955-ad93-e15c70f4ec22   /mnt/steamgames   ext4    rw,users,exec,auto   0 0' >> /etc/fstab
+    fi
 
-#steam library drive
-UUID=87f62db8-a45d-4955-ad93-e15c70f4ec22    /mnt/steamgames    ext4    rw,users,exec,auto    0 0' >> /etc/fstab
+    # Windows Games
+    if ! grep -q "UUID=1975D4020FD241DB" /etc/fstab; then
+        echo '#windows games
+UUID=1975D4020FD241DB /mnt/windowsgames ntfs-3g defaults,uid=1000,gid=1000,windows_names,umask=022,exec,permissions 0 0' >> /etc/fstab
+    fi
+
+    # Other drive
+    if ! grep -q "UUID=e04a3879-dc4e-4ee2-a485-a624efb0f895" /etc/fstab; then
+        echo '#bluekrill data drive
+UUID=e04a3879-dc4e-4ee2-a485-a624efb0f895    /mnt/bluekrill    ext4    rw,users,exec,auto    0 0' >> /etc/fstab
+    fi
 }
 
 # Gaming fixes
@@ -76,7 +89,14 @@ fi
 # Drive setup
 run_action "Creating Steam games mount point" mkdir -p /mnt/steamgames
 run_action "Mounting Steam games drive (/dev/nvme0n1p1)" mount /dev/nvme0n1p1 /mnt/steamgames
-run_action "Adding Steam drive to /etc/fstab for auto-mounting" add_fstab_entry
+
+run_action "Creating Windows games mount point" mkdir -p /mnt/windowsgames
+run_action "Mounting Windows games drive (/dev/nvme0n1p2)" mount /dev/nvme0n1p2 /mnt/windowsgames
+
+run_action "Creating Bluekrill mount point" mkdir -p /mnt/bluekrill
+run_action "Mounting Bluekrill drive (/dev/sda1)" mount /dev/sda1 /mnt/bluekrill
+
+run_action "Adding drives to /etc/fstab for auto-mounting" add_fstab_entry
 
 # Gaming fixes
 run_action "Creating libinput configuration directory" mkdir -p /etc/libinput
